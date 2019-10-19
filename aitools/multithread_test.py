@@ -9,6 +9,7 @@ class MultiTest(unittest.TestCase):
     def test(self):
         requests = [i for i in range(10)]
         results = run_parallel(requests, worker_fn)
+        results.sort()
         self.assertEqual(10, len(results))
         self.assertEqual(2, results[1])
         self.assertEqual(18, results[9])
