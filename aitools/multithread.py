@@ -22,6 +22,9 @@ def run_parallel(job_requests, worker_fn, worker_count=8):
     Note that the jobs will be processed in an undetermined sequence,
     so you cannot rely on the returned results being in the same sequence
     as the input requests.
+
+    The results are returned as a generator and are returned one at a time
+    as they are processed.
     """
 
     results_q = Queue()
@@ -46,16 +49,14 @@ def run_parallel(job_requests, worker_fn, worker_count=8):
     requests_q.join()
 
     # Collate results.
-    results = []
     for i in range(num_requests):
         result = results_q.get()
-        results.append(result)
         results_q.task_done()
+        yield result
 
     # Shut down the worker threads.
     for i in range(worker_count):
         requests_q.put(_terminate)
-    return results
 
 def _worker_proc(worker_num, work_fn, requests_q: Queue, results_q: Queue):
     """The main processing queue for the workers.
